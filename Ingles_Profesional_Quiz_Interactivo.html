@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inglés Profesional 🇬🇧 — Quiz Interactivo</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f2f5;color:#1a1a2e;min-height:100vh}
+  .screen{display:none;max-width:760px;margin:0 auto;padding:24px 16px}
+  .screen.active{display:block}
+  h1{font-size:1.6rem;font-weight:700;color:#1a1a2e;margin-bottom:8px}
+  .subtitle{color:#666;margin-bottom:24px;font-size:.95rem}
+  .card{background:#fff;border-radius:14px;padding:24px;box-shadow:0 2px 12px rgba(0,0,0,.08);margin-bottom:20px}
+  .card h2{font-size:1.05rem;font-weight:600;margin-bottom:16px;color:#1a1a2e}
+  .sources-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:4px}
+  .source-cb{display:flex;align-items:center;gap:8px;padding:10px 14px;border:2px solid #e2e8f0;border-radius:10px;cursor:pointer;transition:all .2s;font-size:.88rem;user-select:none}
+  .source-cb:hover{border-color:#6c63ff;background:#f5f3ff}
+  .source-cb input{accent-color:#6c63ff;width:16px;height:16px;cursor:pointer}
+  .source-cb.checked{border-color:#6c63ff;background:#f0eeff}
+  .mode-btns{display:flex;gap:10px;flex-wrap:wrap}
+  .mode-btn{flex:1;min-width:120px;padding:12px;border:2px solid #e2e8f0;border-radius:10px;background:#fff;cursor:pointer;font-size:.9rem;font-weight:500;transition:all .2s;text-align:center}
+  .mode-btn.selected,.mode-btn:hover{border-color:#6c63ff;background:#f0eeff;color:#6c63ff}
+  .btn{display:inline-block;padding:13px 32px;background:#6c63ff;color:#fff;border:none;border-radius:10px;font-size:1rem;font-weight:600;cursor:pointer;transition:background .2s;text-align:center}
+  .btn:hover{background:#5a52d5}
+  .btn.secondary{background:#f0eeff;color:#6c63ff}
+  .btn.secondary:hover{background:#e0d8ff}
+  .btn.danger{background:#ff6b6b}
+  .btn.danger:hover{background:#e55}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .stats-bar{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+  .stat{background:#fff;border-radius:10px;padding:10px 16px;font-size:.85rem;box-shadow:0 1px 6px rgba(0,0,0,.07)}
+  .stat strong{display:block;font-size:1.2rem;color:#6c63ff}
+  .progress-wrap{background:#e2e8f0;border-radius:99px;height:8px;margin-bottom:24px;overflow:hidden}
+  .progress-bar{height:100%;background:linear-gradient(90deg,#6c63ff,#a78bfa);border-radius:99px;transition:width .4s}
+  .question-num{font-size:.85rem;color:#888;margin-bottom:8px}
+  .question-text{font-size:1.1rem;font-weight:600;line-height:1.5;margin-bottom:20px;color:#1a1a2e}
+  .options{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
+  .option{padding:13px 18px;border:2px solid #e2e8f0;border-radius:10px;cursor:pointer;transition:all .2s;font-size:.95rem;line-height:1.4}
+  .option:hover:not(.disabled){border-color:#6c63ff;background:#f5f3ff}
+  .option.selected{border-color:#6c63ff;background:#f0eeff}
+  .option.correct{border-color:#22c55e;background:#f0fdf4;color:#166534}
+  .option.wrong{border-color:#ef4444;background:#fef2f2;color:#991b1b}
+  .option.show-correct{border-color:#22c55e;background:#f0fdf4;color:#166534}
+  .option.disabled{cursor:default}
+  .feedback{padding:12px 16px;border-radius:10px;font-size:.9rem;font-weight:600;margin-bottom:16px;display:none}
+  .feedback.correct{background:#f0fdf4;color:#166534;border:1px solid #86efac;display:block}
+  .feedback.wrong{background:#fef2f2;color:#991b1b;border:1px solid #fca5a5;display:block}
+  .quiz-actions{display:flex;gap:10px;flex-wrap:wrap}
+  .source-tag{display:inline-block;font-size:.75rem;color:#888;background:#f5f5f5;padding:3px 10px;border-radius:99px;margin-bottom:12px}
+  .score-wrap{text-align:center;padding:20px 0}
+  .score-circle{width:120px;height:120px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:2rem;font-weight:800;border:8px solid}
+  .score-circle.great{border-color:#22c55e;color:#22c55e;background:#f0fdf4}
+  .score-circle.good{border-color:#f59e0b;color:#f59e0b;background:#fffbeb}
+  .score-circle.bad{border-color:#ef4444;color:#ef4444;background:#fef2f2}
+  .score-label{font-size:1.1rem;font-weight:600;margin-bottom:8px}
+  .score-sub{color:#888;font-size:.9rem;margin-bottom:24px}
+  .result-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-bottom:20px}
+  .review-toggle{text-align:center;margin-bottom:12px}
+  .review-list{display:none}
+  .review-list.open{display:block}
+  .review-item{padding:14px;border-radius:10px;margin-bottom:10px;font-size:.9rem}
+  .review-item.ok{background:#f0fdf4;border:1px solid #86efac}
+  .review-item.fail{background:#fef2f2;border:1px solid #fca5a5}
+  .review-item .rq{font-weight:600;margin-bottom:6px}
+  .review-item .ra{color:#166534}.review-item .rw{color:#991b1b;text-decoration:line-through;font-size:.85rem}
+  .select-all-row{display:flex;gap:8px;margin-bottom:12px;align-items:center;flex-wrap:wrap}
+  .small-btn{padding:6px 14px;font-size:.8rem;border:1.5px solid #6c63ff;border-radius:8px;background:#fff;color:#6c63ff;cursor:pointer}
+  .small-btn:hover{background:#f0eeff}
+</style>
+</head>
+<body>
+
+<!-- START SCREEN -->
+<div id="startScreen" class="screen active">
+  <h1>📚 Inglés Profesional 🇬🇧</h1>
+  <p class="subtitle">164 preguntas · Quiz interactivo</p>
+
+  <div class="card">
+    <h2>Fuentes</h2>
+    <div class="select-all-row">
+      <button class="small-btn" onclick="toggleAll(true)">Marcar todas</button>
+      <button class="small-btn" onclick="toggleAll(false)">Desmarcar todas</button>
+    </div>
+    <div class="sources-grid" id="sourcesGrid"></div>
+  </div>
+
+  <div class="card">
+    <h2>Modo</h2>
+    <div class="mode-btns">
+      <div class="mode-btn selected" data-mode="all" onclick="selectMode(this)">Todas las preguntas</div>
+      <div class="mode-btn" data-mode="40" onclick="selectMode(this)">40 aleatorias</div>
+      <div class="mode-btn" data-mode="20" onclick="selectMode(this)">20 aleatorias</div>
+    </div>
+  </div>
+
+  <button class="btn" onclick="startQuiz()" style="width:100%">Empezar test →</button>
+</div>
+
+<!-- QUIZ SCREEN -->
+<div id="quizScreen" class="screen">
+  <div class="stats-bar">
+    <div class="stat"><strong id="statCurrent">1</strong>Pregunta</div>
+    <div class="stat"><strong id="statTotal">0</strong>Total</div>
+    <div class="stat"><strong id="statCorrect" style="color:#22c55e">0</strong>Correctas</div>
+    <div class="stat"><strong id="statWrong" style="color:#ef4444">0</strong>Falladas</div>
+  </div>
+  <div class="progress-wrap"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
+
+  <div class="card">
+    <div class="question-num" id="questionNum"></div>
+    <div class="source-tag" id="sourceTag"></div>
+    <div class="question-text" id="questionText"></div>
+    <div class="options" id="optionsDiv"></div>
+    <div class="feedback" id="feedback"></div>
+    <div class="quiz-actions">
+      <button class="btn" id="nextBtn" onclick="nextQuestion()" disabled>Siguiente →</button>
+      <button class="btn secondary" onclick="skipQuestion()">Saltar</button>
+      <button class="btn danger" style="margin-left:auto" onclick="if(confirm('¿Abandonar el test?'))showStart()">✕</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESULTS SCREEN -->
+<div id="resultsScreen" class="screen">
+  <h1>Resultados</h1>
+  <div class="card">
+    <div class="score-wrap">
+      <div class="score-circle" id="scoreCircle"></div>
+      <div class="score-label" id="scoreLabel"></div>
+      <div class="score-sub" id="scoreSub"></div>
+    </div>
+    <div class="result-actions">
+      <button class="btn secondary" onclick="retryWrong()">🔁 Repetir falladas</button>
+      <button class="btn secondary" onclick="startQuiz()">🔀 Repetir mismo test</button>
+      <button class="btn secondary" onclick="showStart()">⚙️ Nueva config</button>
+    </div>
+    <div class="review-toggle">
+      <button class="small-btn" onclick="toggleReview()">Ver/ocultar respuestas</button>
+    </div>
+    <div class="review-list" id="reviewList"></div>
+  </div>
+</div>
+
+<script>
+const ALL_QUESTIONS = [{"q": "Choose the right expression for a neutral register", "a": "How are you?", "options": ["How are you?", "I am pleased to meet you", "Hi! What’s up?", "All options are correct"], "correct": 0, "source": "Cuestionario. Tema 1"}, {"q": "Choose the right expression for an informal register", "a": "Hi! What’s up?", "options": ["How are you?", "I am pleased to meet you", "Hi! What’s up?", "All options are correct"], "correct": 2, "source": "Cuestionario. Tema 1"}, {"q": "Choose the right expression for a formal register", "a": "I am pleased to meet you", "options": ["How are you?", "I am pleased to meet you", "Hi! What’s up?", "All options are correct"], "correct": 1, "source": "Cuestionario. Tema 1"}, {"q": "Body language includes", "a": "All options are correct", "options": ["Gestures", "Posture", "Facial expressions", "All options are correct"], "correct": 3, "source": "Cuestionario. Tema 1"}, {"q": "Body language", "a": "has similarities and differences depending on the culture", "options": ["Is always the same, it does not depend on the culture", "Is always different in all cultures", "has similarities and differences depending on the culture", "All options are correct"], "correct": 2, "source": "Cuestionario. Tema 1"}, {"q": "It’s 21:30", "a": "Half past nine", "options": ["Nine half past", "Half past nine", "Quarter to nine", "Quarter past nine"], "correct": 1, "source": "Cuestionario. Tema 1"}, {"q": "It’s 17:10", "a": "Ten past five", "options": ["Ten past five", "Five past ten", "Seventeen", "Ten"], "correct": 0, "source": "Cuestionario. Tema 1"}, {"q": "It’s “quarter to ten”", "a": "9:45", "options": ["10:45", "10:15", "9:45", "9:15"], "correct": 2, "source": "Cuestionario. Tema 1"}, {"q": "See you _____ September", "a": "in", "options": ["on", "in", "under", "at"], "correct": 1, "source": "Cuestionario. Tema 1"}, {"q": "She goes to the beach _______ winter!", "a": "in", "options": ["on", "in", "under", "at"], "correct": 1, "source": "Cuestionario. Tema 1"}, {"q": "Choose the right answer for: “What’s your family name?”", "a": "¿Cómo te apellidas?", "options": ["¿Cómo se llama tu familia?", "¿Cómo te llamas?", "¿Cómo te apellidas?", "All options are correct"], "correct": 2, "source": "Cuestionario. Tema 2"}, {"q": "Choose the right answer for: “Do you study or do you work?”", "a": "¿Estudias o trabajas?", "options": ["¿Estudias o trabajas?", "¿Te gusta viajar?", "¿Conoces a mi amiga?", "All options are correct"], "correct": 0, "source": "Cuestionario. Tema 2"}, {"q": "The United Kingdom…", "a": "All options are incorrect", "options": ["Is divided into Scotland and Norway", "Is divided into Wales and Norway", "Is the same as England", "All options are incorrect"], "correct": 3, "source": "Cuestionario. Tema 2"}, {"q": "In the United Kingdom, breakfast…", "a": "All options are correct", "options": ["Is similar to ours", "Is special at the weekends", "Is mainly coffee or tea and toasts", "All options are correct"], "correct": 3, "source": "Cuestionario. Tema 2"}, {"q": "On the weekends, in the United Kingdom it is common to have…", "a": "Roasts", "options": ["Roasts", "Paella", "Fish-based bbq", "All options are correct"], "correct": 0, "source": "Cuestionario. Tema 2"}, {"q": "The verb “to be”", "a": "Means “ser” or “estar”", "options": ["Means “tener”", "Never changes", "Means “ser” or “estar”", "All options are correct"], "correct": 2, "source": "Cuestionario. Tema 2"}, {"q": "“She ______ happy”", "a": "is", "options": ["am", "is", "are", "were"], "correct": 1, "source": "Cuestionario. Tema 2"}, {"q": "“They _________ a house”", "a": "have got", "options": ["has got", "hasn’t got", "have got", "All options are correct"], "correct": 2, "source": "Cuestionario. Tema 2"}, {"q": "“I ________ so tired”", "a": "was", "options": ["was", "were", "is", "are"], "correct": 0, "source": "Cuestionario. Tema 2"}, {"q": "“You _______ a car”", "a": "had got", "options": ["hasn’t got", "has got", "had got", "will has got"], "correct": 2, "source": "Cuestionario. Tema 2"}, {"q": "How do you say “desayunar”?", "a": "have breakfast", "options": ["have dinner", "have breakfast", "wake up", "sleep"], "correct": 1, "source": "Cuestionario. Tema 3"}, {"q": "How do you say “despertarse”?", "a": "wake up", "options": ["wake up", "get up", "have a shower", "sleep"], "correct": 0, "source": "Cuestionario. Tema 3"}, {"q": "Spanglish", "a": "a and b are correct", "options": ["is the result of the coexistence between both languages together, English and Spanish", "is a mechanism of communication", "a and b are correct", "all options are incorrect"], "correct": 2, "source": "Cuestionario. Tema 3"}, {"q": "United States is a", "a": "multicultural country", "options": ["country with two types of culture: traditional and modern", "country with a unique defined culture", "multicultural country", "country with no culture"], "correct": 2, "source": "Cuestionario. Tema 3"}, {"q": "I never _____________ to music on Mondays", "a": "listen", "options": ["listens", "don’t listen", "doesn’t listen", "listen"], "correct": 3, "source": "Cuestionario. Tema 3"}, {"q": "I wake up in the _______________________", "a": "morning", "options": ["morning", "afternoon", "evening", "night"], "correct": 0, "source": "Cuestionario. Tema 3"}, {"q": "I go to bed at _____________________", "a": "night", "options": ["morning", "afternoon", "evening", "night"], "correct": 3, "source": "Cuestionario. Tema 3"}, {"q": "I have lunch in the _________________", "a": "afternoon", "options": ["morning", "afternoon", "evening", "night"], "correct": 1, "source": "Cuestionario. Tema 3"}, {"q": "Choose the correct answer:", "a": "I love pasta", "options": ["I love pasta", "I loves pasta", "I didn’t loves pasta", "I don’t loves pasta"], "correct": 0, "source": "Cuestionario. Tema 3"}, {"q": "Choose the right abbreviation for “are”", "a": "r", "options": ["ar", "r", "u", "all options are correct"], "correct": 1, "source": "Cuestionario. Tema 4"}, {"q": "Choose the right abbreviation for “you”", "a": "u", "options": ["u", "iu", "yu", "ju"], "correct": 0, "source": "Cuestionario. Tema 4"}, {"q": "Choose the right word for the abbreviation \"cul8r\"", "a": "see you later", "options": ["see you tomorrow", "see you later", "see you soon", "All optinos are correct"], "correct": 1, "source": "Cuestionario. Tema 4"}, {"q": "Choose the right word for the abbreviation \"2nite\"", "a": "tonight", "options": ["to you", "to me", "tonight", "All options are correct"], "correct": 2, "source": "Cuestionario. Tema 4"}, {"q": "In Canada, we can find _________ dishes", "a": "All options are correct", "options": ["French", "British", "American", "All options are correct"], "correct": 3, "source": "Cuestionario. Tema 4"}, {"q": "I __________ to music now", "a": "am listening", "options": ["is listen", "is listening", "am listen", "am listening"], "correct": 3, "source": "Cuestionario. Tema 4"}, {"q": "She _______________ football", "a": "isn’t playing", "options": ["aren’t playing", "am not playing", "isn’t playing", "All options are correct"], "correct": 2, "source": "Cuestionario. Tema 4"}, {"q": "___________ (see you) soon", "a": "cya", "options": ["cya", "cyaah", "seu", "all options are correct"], "correct": 0, "source": "Cuestionario. Tema 4"}, {"q": "I love pasta _______ (too)", "a": "2", "options": ["tu", "2", "to", "all options are correct"], "correct": 1, "source": "Cuestionario. Tema 4"}, {"q": "_____ (great)! I love your idea!", "a": "gr8", "options": ["gr8", "greit", "gr", "all options are correct"], "correct": 0, "source": "Cuestionario. Tema 4"}, {"q": "Text me “asap”", "a": "as soon as possible", "options": ["as soon as perfect", "as soon as possible", "as soon as impossible", "all options are correct"], "correct": 1, "source": "Cuestionario. Tema 5"}, {"q": "I have to study “cuz” I have to take an exam", "a": "Because", "options": ["Couscous", "Cause and consequence", "Because", "all options are correct"], "correct": 2, "source": "Cuestionario. Tema 5"}, {"q": "Choose the right word for the abbreviation \"vs”", "a": "versus", "options": ["versus", "vision", "television", "all options are correct"], "correct": 0, "source": "Cuestionario. Tema 5"}, {"q": "“in my opinion”, you should help her", "a": "IMO", "options": ["IM", "IMO", "IMOp", "all options are correct"], "correct": 1, "source": "Cuestionario. Tema 5"}, {"q": "I love sports, “for example”, I really like basket", "a": "e.g.", "options": ["e.g.", "f.e.", "f.x.", "all options are correct"], "correct": 0, "source": "Cuestionario. Tema 5"}, {"q": "Choose the right abbreviation for “figure”", "a": "fig.", "options": ["fig.", "figur.", "f.", "all options are correct"], "correct": 0, "source": "Cuestionario. Tema 5"}, {"q": "A typical dish in South Africa is", "a": "Bobotie", "options": ["Paella", "Soup", "Barbeque", "Bobotie"], "correct": 3, "source": "Cuestionario. Tema 5"}, {"q": "“She ____________ yesterday”", "a": "studied", "options": ["study", "studied", "doesn’t study", "all options are correct"], "correct": 1, "source": "Cuestionario. Tema 5"}, {"q": "“They ___________to music last week”", "a": "listened", "options": ["listened", "listening", "listen", "didn’t listened"], "correct": 0, "source": "Cuestionario. Tema 5"}, {"q": "“We _____________ to the beach last summer”", "a": "went", "options": ["goed", "went", "go", "all options are correct"], "correct": 1, "source": "Cuestionario. Tema 5"}, {"q": "“Now” is an expression used to talk about", "a": "present", "options": ["present", "past", "future", "all options are correct"], "correct": 0, "source": "Cuestionario. Tema 6"}, {"q": "“Tomorrow” is an expression used to talk about", "a": "future", "options": ["present", "past", "future", "all options are correct"], "correct": 2, "source": "Cuestionario. Tema 6"}, {"q": "“Yesterday” is an expression used to talk about", "a": "past", "options": ["present", "past", "future", "all options are correct"], "correct": 1, "source": "Cuestionario. Tema 6"}, {"q": "“Two years ago” is an expression used to talk about", "a": "past", "options": ["present", "past", "future", "all options are correct"], "correct": 1, "source": "Cuestionario. Tema 6"}, {"q": "____ the morning", "a": "in", "options": ["in", "on", "at", "all options are correct"], "correct": 0, "source": "Cuestionario. Tema 6"}, {"q": "____ night", "a": "at", "options": ["in", "on", "at", "all options are correct"], "correct": 2, "source": "Cuestionario. Tema 6"}, {"q": "____ spring", "a": "in", "options": ["in", "on", "at", "all options are correct"], "correct": 0, "source": "Cuestionario. Tema 6"}, {"q": "_____ half past nine", "a": "at", "options": ["in", "on", "at", "all options are correct"], "correct": 2, "source": "Cuestionario. Tema 6"}, {"q": "New Zealand is a country in", "a": "Oceania", "options": ["Europe", "Asia", "Oceania", "America"], "correct": 2, "source": "Cuestionario. Tema 6"}, {"q": "I ____________ lunch yesterday at 5pm", "a": "was having", "options": ["was having", "was haveing", "were having", "were haveing"], "correct": 0, "source": "Cuestionario. Tema 6"}, {"q": "“I'm very fond of” is an expression of", "a": "likes and dislikes", "options": ["likes and dislikes", "opinions", "positive agreement", "negative agreement"], "correct": 0, "source": "Cuestionario. Tema 7"}, {"q": "“I consider” is an expression of", "a": "opinions", "options": ["likes and dislikes", "opinions", "positive agreement", "negative agreement"], "correct": 1, "source": "Cuestionario. Tema 7"}, {"q": "“I see your point” is an expression of", "a": "positive agreement", "options": ["likes and dislikes", "opinions", "positive agreement", "negative agreement"], "correct": 2, "source": "Cuestionario. Tema 7"}, {"q": "“You are partly right, but…” is an expression of", "a": "negative agreement", "options": ["likes and dislikes", "opinions", "positive agreement", "negative agreement"], "correct": 3, "source": "Cuestionario. Tema 7"}, {"q": "“The Great Barrier Reef” can be found in", "a": "Australia", "options": ["The United Kingdom", "New Zealand", "Australia", "France"], "correct": 2, "source": "Cuestionario. Tema 7"}, {"q": "I ___________ a lot for this exam", "a": "have studied", "options": ["has studied", "have studied", "hasn’t studied", "all options are correct"], "correct": 1, "source": "Cuestionario. Tema 7"}, {"q": "She ____________ this morning", "a": "has trained", "options": ["has trained", "has train", "have trained", "hasn’t train"], "correct": 0, "source": "Cuestionario. Tema 7"}, {"q": "We have slept _____________ two hours", "a": "for", "options": ["for", "since", "yet", "already"], "correct": 0, "source": "Cuestionario. Tema 7"}, {"q": "This group has been singing _________ 10pm", "a": "since", "options": ["for", "since", "yet", "already"], "correct": 1, "source": "Cuestionario. Tema 7"}, {"q": "We ________ finished yet", "a": "haven’t", "options": ["hasn’t", "haven’t", "has", "have"], "correct": 1, "source": "Cuestionario. Tema 7"}, {"q": "A question used to ask for agreement is…", "a": "Do you agree?", "options": ["What’s your name?", "Where do you live?", "Do you agree?", "All options are correct"], "correct": 2, "source": "Cuestionario. Tema 8"}, {"q": "Which expression means “¿Ves mi punto de vista?”?", "a": "Do you see my point?", "options": ["Do you see my point?", "Where are you from?", "How old are you?", "All options are correct"], "correct": 0, "source": "Cuestionario. Tema 8"}, {"q": "In a complaint sheet, we can find", "a": "Name", "options": ["Name", "Favourite colour", "Pets", "All options are correct"], "correct": 0, "source": "Cuestionario. Tema 8"}, {"q": "In a complaint sheet, we can’t find", "a": "All options are incorrect", "options": ["Personal data", "Description of the problem", "Resolution requested", "All options are incorrect"], "correct": 3, "source": "Cuestionario. Tema 8"}, {"q": "This monument can be found in India", "a": "Taj Mahal", "options": ["Mosque Cathedral", "Taj Mahal", "Eiffel Tower", "The Great Wall of China"], "correct": 1, "source": "Cuestionario. Tema 8"}, {"q": "In India, they drink", "a": "Coconut milk", "options": ["Almond Milk", "Coconut milk", "They don’t drink milk", "A and B are correct"], "correct": 1, "source": "Cuestionario. Tema 8"}, {"q": "The past perfect is known as:", "a": "The past of the past", "options": ["The past of the past", "The past of the present", "The simple past", "A future tense"], "correct": 0, "source": "Cuestionario. Tema 8"}, {"q": "She _______ had a shower when I arrived", "a": "had", "options": ["had", "have", "haves", "all options are correct"], "correct": 0, "source": "Cuestionario. Tema 8"}, {"q": "How do you say “gira a la derecha”?", "a": "Turn right", "options": ["Turn right", "It’s on your left", "Go on", "All options are correct"], "correct": 0, "source": "Cuestionario. Tema 9"}, {"q": "This expression is used to talk about “right” when we are giving directions", "a": "All options are correct", "options": ["Turn right", "It’s on your right", "Take the first on the right", "All options are correct"], "correct": 3, "source": "Cuestionario. Tema 9"}, {"q": "This expression is used to talk about “left” when we are giving directions", "a": "It’s on your left", "options": ["Turn right", "It’s on your left", "Go on", "All options are correct"], "correct": 1, "source": "Cuestionario. Tema 9"}, {"q": "This expression is not used to talk about “right” nor “left” when we are giving directions", "a": "Go on", "options": ["Turn right", "It’s on your left", "Go on", "All options are correct"], "correct": 2, "source": "Cuestionario. Tema 9"}, {"q": "Choose a question used to ask for directions", "a": "How could I get to…?", "options": ["Where are you from?", "Where do you live?", "How could I get to…?", "What’s your name?"], "correct": 2, "source": "Cuestionario. Tema 9"}, {"q": "Isaac Newton is from", "a": "England", "options": ["England", "Australia", "New Zealand", "America"], "correct": 0, "source": "Cuestionario. Tema 9"}, {"q": "Isaac Newton discovered", "a": "Gravity", "options": ["Photography", "Television", "Music", "Gravity"], "correct": 3, "source": "Cuestionario. Tema 9"}, {"q": "Choose the right option", "a": "a and b are correct", "options": ["Take a seat, please", "Do take a seat, please", "a and b are correct", "Does take a seat"], "correct": 2, "source": "Cuestionario. Tema 9"}, {"q": "We need a subject for imperative verbs", "a": "Never", "options": ["Always", "Never", "It depends on the verb", "All options are correct"], "correct": 1, "source": "Cuestionario. Tema 9"}, {"q": "“Charger” means", "a": "Cargador", "options": ["Cargador", "Auriculares", "Llamada", "All options are correct"], "correct": 0, "source": "Cuestionario. Tema 10"}, {"q": "“On hold” means", "a": "En espera", "options": ["Colgar", "En espera", "Contestar", "All options are correct"], "correct": 1, "source": "Cuestionario. Tema 10"}, {"q": "“Hang up” means", "a": "Colgar", "options": ["Contestar", "Marcar", "Colgar", "All options are correct"], "correct": 2, "source": "Cuestionario. Tema 10"}, {"q": "I ________ you!", "a": "will help", "options": ["will help", "will helping", "will helped", "will helps"], "correct": 0, "source": "Cuestionario. Tema 10"}, {"q": "I think it _________ today", "a": "will rain", "options": ["will rains", "will rain", "won’t rains", "won’t rained"], "correct": 1, "source": "Cuestionario. Tema 10"}, {"q": "“Missed call” means", "a": "Llamada perdida", "options": ["Llamada en espera", "Llamada rechazada", "Llamada perdida", "All options are correct"], "correct": 2, "source": "Cuestionario. Tema 10"}, {"q": "“Dial” means", "a": "Marcar", "options": ["Esperar", "Colgar", "Llamar", "Marcar"], "correct": 3, "source": "Cuestionario. Tema 10"}, {"q": "“Darwin’s theory of ___________ meant controversy and debate”", "a": "evolution", "options": ["DNA structure", "evolution", "music", "sport"], "correct": 1, "source": "Cuestionario. Tema 10"}, {"q": "They _______________ this summer", "a": "are going to travel", "options": ["are going to travel", "is going to travel", "am going to travel", "is going to traveling"], "correct": 0, "source": "Cuestionario. Tema 10"}, {"q": "We _________________ their wedding at Christmas", "a": "are going to celebrate", "options": ["are going to celebrate", "is going to celebrate", "am going to celebrate", "isn’t going to celebrate"], "correct": 0, "source": "Cuestionario. Tema 10"}, {"q": "“Ticket office” means", "a": "Taquilla", "options": ["Puerta de embarque", "Taquilla", "Asiento", "All options are incorrect"], "correct": 1, "source": "Cuestionario. Tema 11"}, {"q": "“round-trip ticket” means", "a": "Billete de ida y vuelta", "options": ["Billete de ida", "Billete de vuelta", "Billete de ida y vuelta", "All options are incorrect"], "correct": 2, "source": "Cuestionario. Tema 11"}, {"q": "“arrival” means", "a": "Llegada", "options": ["Salida", "Llegada", "Puerta de embarque", "Maleta"], "correct": 1, "source": "Cuestionario. Tema 11"}, {"q": "“delayed” means", "a": "Retrasado", "options": ["Salida", "Llegada", "Retrasado", "All options are incorrect"], "correct": 2, "source": "Cuestionario. Tema 11"}, {"q": "“stopover” means", "a": "Escala", "options": ["Escala", "Salida", "Llegada", "Horario"], "correct": 0, "source": "Cuestionario. Tema 11"}, {"q": "“schedule” means", "a": "Horario", "options": ["Escala", "Horario", "Salida", "Llegada"], "correct": 1, "source": "Cuestionario. Tema 11"}, {"q": "I __________________ TV tomorrow morning", "a": "won’t be watching", "options": ["will be watch", "won’t be watching", "will be watches", "ninguna es correcta"], "correct": 1, "source": "Cuestionario. Tema 11"}, {"q": "They ________________, for sure!", "a": "will be studying", "options": ["will be studying", "will have studying", "will have study", "will has studying"], "correct": 0, "source": "Cuestionario. Tema 11"}, {"q": "I _______________ my homework by tomorrow morning", "a": "will have done", "options": ["will doing", "will have doing", "will be done", "will have done"], "correct": 3, "source": "Cuestionario. Tema 11"}, {"q": "We ________________ to Madrid tomorrow afternoon", "a": "will be going", "options": ["will be go", "will be goes", "will be going", "will going"], "correct": 2, "source": "Cuestionario. Tema 11"}, {"q": "“First of all” is a connector used for", "a": "Structure", "options": ["Structure", "Exemplify", "Cause", "Effect"], "correct": 0, "source": "Cuestionario. Tema 12"}, {"q": "“As a result” is a connector for", "a": "Cause and effect", "options": ["Examples", "Addition", "Opposition", "Cause and effect"], "correct": 3, "source": "Cuestionario. Tema 12"}, {"q": "This sentence is a first conditional", "a": "If you study hard, you will pass", "options": ["If you heat water, it boils", "If you study hard, you will pass", "If you go out when it’s raining, you are wet", "All options are correct"], "correct": 1, "source": "Cuestionario. Tema 12"}, {"q": "“If” can be replaced by", "a": "Whether", "options": ["it cannot be replaced", "that", "less", "Whether"], "correct": 3, "source": "Cuestionario. Tema 12"}, {"q": "This sentence is a zero conditional", "a": "If you heat water, it boils", "options": ["If you run a lot, you will be tired", "If you heat water, it boils", "You will be tired, if you run a lot", "a and c are correct"], "correct": 1, "source": "Cuestionario. Tema 12"}, {"q": "Zero conditional is used for", "a": "Universal truths", "options": ["Universal truths", "Probable conditions", "Possible conditions", "Impossible conditions"], "correct": 0, "source": "Cuestionario. Tema 12"}, {"q": "First conditional is used for", "a": "Probable conditions", "options": ["Universal truths", "Probable conditions", "Possible conditions", "Impossible conditions"], "correct": 1, "source": "Cuestionario. Tema 12"}, {"q": "The modal verb that can be used to talk about advice is", "a": "Should", "options": ["Can", "Must", "Should", "Mustn’t"], "correct": 2, "source": "Cuestionario. Tema 12"}, {"q": "The modal verb that can be used to talk about prohibition is", "a": "Mustn’t", "options": ["Can", "Must", "Should", "Mustn’t"], "correct": 3, "source": "Cuestionario. Tema 12"}, {"q": "If you study more, you _____________.", "a": "will pass", "options": ["will pass", "will passing", "will passed", "won’t passing"], "correct": 0, "source": "Cuestionario. Tema 12"}, {"q": "“Best regards” corresponds to", "a": "Farewell", "options": ["Greetings", "Introductions", "Body", "Farewell"], "correct": 3, "source": "Cuestionario. Tema 13"}, {"q": "“Good afternoon” corresponds to", "a": "Greetings", "options": ["Greetings", "Introductions", "Body", "Farewell"], "correct": 0, "source": "Cuestionario. Tema 13"}, {"q": "“In addition, I would like to mention that” corresponds to", "a": "Body", "options": ["Greetings", "Introductions", "Body", "Farewell"], "correct": 2, "source": "Cuestionario. Tema 13"}, {"q": "“I hope this email finds you well” corresponds to", "a": "Introductions", "options": ["Greetings", "Introductions", "Body", "Farewell"], "correct": 1, "source": "Cuestionario. Tema 13"}, {"q": "“Sincerely” corresponds to", "a": "Farewell", "options": ["Greetings", "Introductions", "Body", "Farewell"], "correct": 3, "source": "Cuestionario. Tema 13"}, {"q": "“Thank you for your time and consideration” corresponds to", "a": "Farewell", "options": ["Greetings", "Introductions", "Body", "Farewell"], "correct": 3, "source": "Cuestionario. Tema 13"}, {"q": "In a formal email, we can find", "a": "a and b are correct", "options": ["Greeting and introduction", "Body and farewell", "a and b are correct", "All options are incorrect"], "correct": 2, "source": "Cuestionario. Tema 13"}, {"q": "Choose the correct Third Conditional sentence.", "a": "If they had left earlier, they would have arrived on time.", "options": ["If I eat earlier, I would have felt better.", "If I studied more, I would pass.", "If they had left earlier, they would have arrived on time.", "If she leaves early, she arrives early."], "correct": 2, "source": "Cuestionario. Tema 13"}, {"q": "Choose the correct Second Conditional sentence.", "a": "If I knew her address, I would send her a letter.", "options": ["If I save enough money, I will travel to Japan.", "If I knew her address, I would send her a letter.", "If she has time, she will visit us.", "If he studies, he passes the exam."], "correct": 1, "source": "Cuestionario. Tema 13"}, {"q": "If you ___________ me, I would go to your birthday party", "a": "invited", "options": ["inviting", "will invite", "invited", "doesn’t invite"], "correct": 2, "source": "Cuestionario. Tema 13"}, {"q": "“Job” means", "a": "Trabajo", "options": ["Trabajo", "Trabajar", "Trabajo en equipo", "All options are correct"], "correct": 0, "source": "Cuestionario. Tema 14"}, {"q": "In a job ad, we can find the following pieces of information", "a": "All options are correct", "options": ["Job position", "Work conditions", "Contact", "All options are correct"], "correct": 3, "source": "Cuestionario. Tema 14"}, {"q": "Thomas Alva Edison was partially", "a": "deaf", "options": ["deaf", "blind", "mute", "all the answers are correct"], "correct": 0, "source": "Cuestionario. Tema 14"}, {"q": "“Teamwork” means", "a": "Trabajo en equipo", "options": ["Trabajo", "Trabajar", "Trabajo en equipo", "All options are correct"], "correct": 2, "source": "Cuestionario. Tema 14"}, {"q": "This TV show ____________ by many people", "a": "is watched", "options": ["is watch", "watch", "is watched", "is watching"], "correct": 2, "source": "Cuestionario. Tema 14"}, {"q": "“Coworker” means", "a": "Compañero de trabajo", "options": ["Descanso", "Turno", "Compañero de trabajo", "All options are correct"], "correct": 2, "source": "Cuestionario. Tema 14"}, {"q": "“Break” means", "a": "Descanso", "options": ["Descanso", "Turno", "Compañero de trabajo", "All options are correct"], "correct": 0, "source": "Cuestionario. Tema 14"}, {"q": "This ______________ by Thomas Alva Edison", "a": "was invented", "options": ["was invent", "was inventing", "was invented", "invented"], "correct": 2, "source": "Cuestionario. Tema 14"}, {"q": "“Shift” means", "a": "Turno", "options": ["Descanso", "Turno", "Compañero de trabajo", "All options are correct"], "correct": 1, "source": "Cuestionario. Tema 14"}, {"q": "“To Work” means", "a": "Trabajar", "options": ["Trabajo", "Trabajar", "Trabajo en equipo", "All options are correct"], "correct": 1, "source": "Cuestionario. Tema 14"}, {"q": "“Employment contract” means", "a": "Contrato de trabajo", "options": ["Búsqueda de empleo", "Experiencia laboral", "Contrato de trabajo", "All options are correct"], "correct": 2, "source": "Cuestionario. Tema 15"}, {"q": "This homework _________ by students", "a": "will be done", "options": ["will do", "will done", "will doing", "will be done"], "correct": 3, "source": "Cuestionario. Tema 15"}, {"q": "“Work experience” means", "a": "Experiencia laboral", "options": ["Búsqueda de empleo", "Experiencia laboral", "Contrato de trabajo", "All options are incorrect"], "correct": 1, "source": "Cuestionario. Tema 15"}, {"q": "Gertrude Belle Elion was a brilliant", "a": "scientist", "options": ["musician", "artist", "scientist", "sportswoman"], "correct": 2, "source": "Cuestionario. Tema 15"}, {"q": "“Job search” means", "a": "Búsqueda de empleo", "options": ["Búsqueda de empleo", "Experiencia laboral", "Contrato de trabajo", "All options are correct"], "correct": 0, "source": "Cuestionario. Tema 15"}, {"q": "One of the possible sections in a CV is", "a": "career objective", "options": ["career objective", "job opportunity", "company culture", "remote work"], "correct": 0, "source": "Cuestionario. Tema 15"}, {"q": "“Job vacancy” means", "a": "Vacante", "options": ["Solicitud de empleo", "Vacante", "Habilidades profesionales", "All options are incorrect"], "correct": 1, "source": "Cuestionario. Tema 15"}, {"q": "“Professional skills” means", "a": "Habilidades profesionales", "options": ["Solicitud de empleo", "Vacante", "Habilidades profesionales", "All options are correct"], "correct": 2, "source": "Cuestionario. Tema 15"}, {"q": "“Job application” means", "a": "Solicitud de empleo", "options": ["Solicitud de empleo", "Vacante", "Habilidades profesionales", "All options are incorrect"], "correct": 0, "source": "Cuestionario. Tema 15"}, {"q": "A common question in a job interview is", "a": "All options are correct", "options": ["Tell me about yourself", "Tell me about your work experience", "Tell me about your academic background", "All options are correct"], "correct": 3, "source": "Cuestionario. Tema 15"}, {"q": "When we are looking for a job we must write a ..... to different job offers.", "a": "CV/resume", "options": ["CV/resume", "job Interview", "career", "salary"], "correct": 0, "source": "Repaso 2ª Evaluación"}, {"q": "Which is another way to say \"for example\"?", "a": "For instance.", "options": ["As a result.", "For instance.", "In other words.", "In conclusion."], "correct": 1, "source": "Repaso 2ª Evaluación"}, {"q": "What does \"refund\" mean?", "a": "To give money back.", "options": ["To ask for help.", "To take money.", "To give money back.", "To exchange goods."], "correct": 2, "source": "Repaso 2ª Evaluación"}, {"q": "Which of the following sentences is a second conditional?", "a": "f I won the lottery, I would buy a bigger house", "options": ["f I won the lottery, I would buy a bigger house", "If I had not left early that day, I would have seen him for the last time.", "If she had studied more, she would have graduated.", "We would have learned English faster if my family had gone to London"], "correct": 0, "source": "Repaso 2ª Evaluación"}, {"q": "Which is the practice of an employee working at home?", "a": "Remote work.", "options": ["Job market.", "Remote work.", "Work environment.", "Time management."], "correct": 1, "source": "Repaso 2ª Evaluación"}, {"q": "Fill in the gap with the correct form: \"The decision ..... made last week.\"", "a": "was", "options": ["will be", "were", "was", "is"], "correct": 2, "source": "Repaso 2ª Evaluación"}, {"q": "Which phrase expresses disagreement?", "a": "I don’t see your point.", "options": ["I agree with you.", "I don’t see your point.", "You are right.", "Absolutely."], "correct": 1, "source": "Repaso 2ª Evaluación"}, {"q": "Which sentence correctly shows the past perfect?", "a": "They had gone to bed before I arrived.", "options": ["She has cooked dinner by the time I got home.", "They had gone to bed before I arrived.", "We had arrive at the station late.", "We had arrive at the station late."], "correct": 1, "source": "Repaso 2ª Evaluación"}, {"q": "When someone asks for directions, a possible answer could be...", "a": "Take the first street on the right.", "options": ["Where's the nearest underground station?", "Excuse me, could you explain to me how to go to the museum?", "Take the first street on the right.", "How could I get to the train station?"], "correct": 2, "source": "Repaso 2ª Evaluación"}, {"q": "Which expression means \"next to\"?", "a": "Close to.", "options": ["Opposite.", "Far.", "Close to.", "In front of."], "correct": 2, "source": "Repaso 2ª Evaluación"}, {"q": "Which sentence correctly uses the first conditional?", "a": "If it rains, we will stay indoors.", "options": ["If it rains, we will stay indoors.", "If it rained, we will stay indoors.", "If it rains, we stayed indoors.", "If it will rain, we stay indoors."], "correct": 0, "source": "Repaso 2ª Evaluación"}, {"q": "A possible answer for the following question \"What's your opinion about global climate change?\" could be .....", "a": "From my point of view, we must do something to solve it as soon as possible.", "options": ["Yes, I agree with you.", "From my point of view, we must do something to solve it as soon as possible.", "I see your point, but I don't quite agree.", "I don't share your point of view."], "correct": 1, "source": "Repaso 2ª Evaluación"}, {"q": "When you buy a ticket to go and come back, this ticket is called ...", "a": "Round-trip-ticket.", "options": ["Round-trip-ticket.", "Change.", "Direct flight.", "Subway."], "correct": 0, "source": "Repaso 2ª Evaluación"}, {"q": "Which sentence uses the future continuous correctly?", "a": "She will be singing at the concert tomorrow.", "options": ["She will be sings at the concert tomorrow.", "She will be singing at the concert tomorrow.", "She will singing at the concert tomorrow.", "She will sang at the concert tomorrow."], "correct": 1, "source": "Repaso 2ª Evaluación"}, {"q": "Complete the following zero conditional: If you recycle, you ..... waste.", "a": "reduce", "options": ["will reduce", "reduces", "reducing", "reduce"], "correct": 3, "source": "Repaso 2ª Evaluación"}, {"q": "What sentence refers to the future?", "a": "Are you going to come to the party next week?", "options": ["They don't take a seat.", "They went to the park.", "Are you going to come to the party next week?", "I have finished my homework."], "correct": 2, "source": "Repaso 2ª Evaluación"}, {"q": "Choose the sentence which is in imperative.", "a": "Don't smoke.", "options": ["I listen to you.", "They don't take a seat.", "We don't open the door.", "Don't smoke."], "correct": 3, "source": "Repaso 2ª Evaluación"}, {"q": "Fill in the gap with the correct form: \"The interview ...... next Tuesday at 10 AM.\"", "a": "will be scheduled", "options": ["will be scheduled", "was scheduled", "is scheduled", "will scheduled"], "correct": 0, "source": "Repaso 2ª Evaluación"}];
+const SOURCES = ["Cuestionario. Tema 1", "Cuestionario. Tema 2", "Cuestionario. Tema 3", "Cuestionario. Tema 4", "Cuestionario. Tema 5", "Cuestionario. Tema 6", "Cuestionario. Tema 7", "Cuestionario. Tema 8", "Cuestionario. Tema 9", "Cuestionario. Tema 10", "Cuestionario. Tema 11", "Cuestionario. Tema 12", "Cuestionario. Tema 13", "Cuestionario. Tema 14", "Cuestionario. Tema 15", "Repaso 2ª Evaluación"];
+
+let sessionQs = [];
+let currentIdx = 0;
+let correct = 0;
+let wrong = 0;
+let answered = false;
+let wrongQs = [];
+let selectedSources = new Set(SOURCES);
+let mode = 'all';
+let lastPool = [];
+
+function buildSourcesGrid() {
+  const grid = document.getElementById('sourcesGrid');
+  grid.innerHTML = '';
+  SOURCES.forEach(src => {
+    const lbl = document.createElement('label');
+    lbl.className = 'source-cb checked';
+    lbl.innerHTML = `<input type="checkbox" checked onchange="toggleSource('${src}', this.checked)"> ${src}`;
+    grid.appendChild(lbl);
+  });
+}
+
+function toggleSource(src, checked) {
+  if (checked) selectedSources.add(src); else selectedSources.delete(src);
+  document.querySelectorAll('.source-cb').forEach(lbl => {
+    const inp = lbl.querySelector('input');
+    lbl.classList.toggle('checked', inp.checked);
+  });
+}
+
+function toggleAll(state) {
+  selectedSources = state ? new Set(SOURCES) : new Set();
+  document.querySelectorAll('.source-cb input').forEach(inp => { inp.checked = state; inp.closest('.source-cb').classList.toggle('checked', state); });
+}
+
+function selectMode(el) {
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  mode = el.dataset.mode;
+}
+
+function shuffle(arr) { return arr.sort(() => Math.random() - 0.5); }
+
+function startQuiz(pool) {
+  if (!pool) {
+    let filtered = ALL_QUESTIONS.filter(q => selectedSources.has(q.source));
+    if (!filtered.length) { alert('Selecciona al menos una fuente'); return; }
+    const n = parseInt(mode);
+    if (!isNaN(n) && filtered.length > n) filtered = shuffle([...filtered]).slice(0, n);
+    pool = filtered;
+  }
+  lastPool = pool;
+  sessionQs = pool.map(q => {
+    const paired = q.options.map((o,i) => ({text:o, isCorrect:i===q.correct}));
+    const shuf = shuffle([...paired]);
+    return {q:q.q, source:q.source, options:shuf.map(p=>p.text), correct:shuf.findIndex(p=>p.isCorrect), orig:q};
+  });
+  currentIdx = 0; correct = 0; wrong = 0; wrongQs = [];
+  show('quizScreen');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  if (currentIdx >= sessionQs.length) { showResults(); return; }
+  const q = sessionQs[currentIdx];
+  answered = false;
+  document.getElementById('questionNum').textContent = `Pregunta ${currentIdx+1} de ${sessionQs.length}`;
+  document.getElementById('sourceTag').textContent = q.source;
+  document.getElementById('questionText').textContent = q.q;
+  document.getElementById('statCurrent').textContent = currentIdx+1;
+  document.getElementById('statTotal').textContent = sessionQs.length;
+  document.getElementById('statCorrect').textContent = correct;
+  document.getElementById('statWrong').textContent = wrong;
+  document.getElementById('progressBar').style.width = (currentIdx/sessionQs.length*100)+'%';
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('nextBtn').disabled = true;
+  const div = document.getElementById('optionsDiv');
+  div.innerHTML = '';
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('div');
+    btn.className = 'option';
+    btn.textContent = opt;
+    btn.onclick = () => selectAnswer(i);
+    div.appendChild(btn);
+  });
+}
+
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+  const q = sessionQs[currentIdx];
+  const opts = document.querySelectorAll('.option');
+  opts.forEach(o => o.classList.add('disabled'));
+  const isCorrect = idx === q.correct;
+  opts[idx].classList.add(isCorrect ? 'correct' : 'wrong');
+  if (!isCorrect) {
+    opts[q.correct].classList.add('show-correct');
+    wrong++;
+    wrongQs.push(q.orig);
+    document.getElementById('feedback').className = 'feedback wrong';
+    document.getElementById('feedback').textContent = `✗ Incorrecto. Respuesta correcta: "${q.options[q.correct]}"`;
+  } else {
+    correct++;
+    document.getElementById('feedback').className = 'feedback correct';
+    document.getElementById('feedback').textContent = '✓ ¡Correcto!';
+  }
+  document.getElementById('statCorrect').textContent = correct;
+  document.getElementById('statWrong').textContent = wrong;
+  document.getElementById('nextBtn').disabled = false;
+}
+
+function nextQuestion() { currentIdx++; renderQuestion(); }
+function skipQuestion() { currentIdx++; renderQuestion(); }
+
+function showResults() {
+  show('resultsScreen');
+  const total = sessionQs.length;
+  const pct = Math.round(correct/total*100);
+  const circle = document.getElementById('scoreCircle');
+  circle.textContent = pct+'%';
+  circle.className = 'score-circle ' + (pct>=80?'great':pct>=50?'good':'bad');
+  document.getElementById('scoreLabel').textContent = pct>=80?'¡Excelente!':pct>=50?'Bien, sigue practicando':'Hay que repasar más';
+  document.getElementById('scoreSub').textContent = `${correct} correctas / ${wrong} incorrectas / ${total-correct-wrong} sin responder · de ${total} preguntas`;
+  const list = document.getElementById('reviewList');
+  list.innerHTML = sessionQs.map((q,i) => {
+    const userWrong = wrongQs.some(w => w.q===q.q);
+    return `<div class="review-item ${userWrong?'fail':'ok'}">
+      <div class="rq">${i+1}. ${q.q}</div>
+      <div class="ra">✓ ${q.options[q.correct]}</div>
+      ${userWrong?'<div class="rw">Tu respuesta fue incorrecta</div>':''}
+    </div>`;
+  }).join('');
+}
+
+function retryWrong() {
+  if (!wrongQs.length) { alert('¡No tienes respuestas falladas!'); return; }
+  startQuiz(wrongQs);
+}
+
+function toggleReview() {
+  const list = document.getElementById('reviewList');
+  list.classList.toggle('open');
+}
+
+function showStart() { show('startScreen'); }
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+buildSourcesGrid();
+</script>
+</body>
+</html>
